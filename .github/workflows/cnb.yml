@@ -41,12 +41,12 @@ jobs:
             exit 1
           fi
           
-          if [ -f "channels/hd.gz" ]; then
-            echo "✅ channels/hd.gz 文件存在"
-            HD_SIZE=$(ls -lh channels/hd.gz | awk '{print $5}')
+          if [ -f "channel/hd.gz" ]; then
+            echo "✅ channel/hd.gz 文件存在"
+            HD_SIZE=$(ls -lh channel/hd.gz | awk '{print $5}')
             echo "文件大小: $HD_SIZE"
           else
-            echo "❌ 错误：channels/hd.gz 文件不存在"
+            echo "❌ 错误：channel/hd.gz 文件不存在"
             exit 1
           fi
           
@@ -60,7 +60,7 @@ jobs:
           echo ""
           echo "待同步文件列表:"
           echo "1. epg/epg.gz - EPG数据文件"
-          echo "2. channels/hd.gz - 频道列表文件"
+          echo "2. channel/hd.gz - 频道列表文件"
           echo ""
           
           echo "正在推送文件到CNB仓库..."
