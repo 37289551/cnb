@@ -1,0 +1,26 @@
+name: CNB
+
+on:
+  push:
+    branches: [ main ]  # 推送到 main 分支时触发
+
+jobs:
+  sync-cnb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 获取全部历史记录
+
+      - name: 同步到 CNB
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:${{ github.workspace }} \
+            -w ${{ github.workspace }} \
+            -e PLUGIN_TARGET_URL="https://cnb.cool/ADM25/37289551/cnb.git" \
+            -e PLUGIN_AUTH_TYPE="https" \
+            -e PLUGIN_USERNAME="37289551" \
+            -e PLUGIN_PASSWORD="${{ secrets.CNB_TOKEN }}" \
+            -e PLUGIN_BRANCH="main" \
+            tencentcom/git-sync
