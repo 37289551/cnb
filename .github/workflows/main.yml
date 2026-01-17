@@ -1,0 +1,30 @@
+
+name: cnb
+
+on:
+  schedule:
+    - cron: '0 16 * * *'  # 每天凌晨2点运行
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  copy_and_convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+
+      - name: Checkout HD repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository_owner }}/HD
+          path: HD
+
+      - name: Copy epg.gz file
+        run: |
+          mkdir -p epg
+          cp HD/output/epg/epg.gz epg/
+
+      - name: Generate hd.gz from result.m3u
+        run: |
+          mkdir -p channel
+          cat HD/output/result.m3u > channel/hd.gz
