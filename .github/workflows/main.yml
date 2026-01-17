@@ -3,8 +3,8 @@ name: cnb
 
 on:
   schedule:
-    - cron: '0 16 * * *'  # 每天凌晨2点运行
-  workflow_dispatch:  # 手动触发
+    - cron: '30 16 * * *'
+  workflow_dispatch:
 
 jobs:
   copy_and_convert:
@@ -28,3 +28,15 @@ jobs:
         run: |
           mkdir -p channel
           cat HD/output/result.m3u > channel/hd.gz
+
+      - name: Check for changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git diff-index --quiet HEAD || git commit -m "Auto-sync files from HD repo - $(date '+%Y-%m-%d %H:%M:%S')"
+          
+      - name: Push changes
+        run: |
+          git push origin main
+
