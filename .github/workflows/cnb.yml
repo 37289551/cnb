@@ -1,0 +1,90 @@
+
+name: CNB 
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  sync-to-cnb:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Add CNB remote repository
+        run: |
+          git remote add cnb https://x-token-auth:${{ secrets.CNB_TOKEN }}@code.cnb.cool/ADM25/37289551/cnb.git
+
+      - name: Verify source files existence
+        run: |
+          echo "开始验证源文件..."
+          
+          if [ -f "epg/epg.gz" ]; then
+            echo "✅ epg/epg.gz 文件存在"
+            EPG_SIZE=$(ls -lh epg/epg.gz | awk '{print $5}')
+            echo "文件大小: $EPG_SIZE"
+          else
+            echo "❌ 错误：epg/epg.gz 文件不存在"
+            exit 1
+          fi
+          
+          if [ -f "channels/hd.gz" ]; then
+            echo "✅ channels/hd.gz 文件存在"
+            HD_SIZE=$(ls -lh channels/hd.gz | awk '{print $5}')
+            echo "文件大小: $HD_SIZE"
+          else
+            echo "❌ 错误：channels/hd.gz 文件不存在"
+            exit 1
+          fi
+          
+          echo "源文件验证完成"
+
+      - name: Push files to CNB repository
+        run: |
+          echo "开始同步文件到CNB仓库..."
+          echo "目标仓库URL: https://cnb.cool/ADM25/37289551/cnb"
+          echo "同步时间: $(date '+%Y-%m-%d %H:%M:%S')"
+          echo ""
+          echo "待同步文件列表:"
+          echo "1. epg/epg.gz - EPG数据文件"
+          echo "2. channels/hd.gz - 频道列表文件"
+          echo ""
+          
+          echo "正在推送文件到CNB仓库..."
+          git push cnb main --force
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ 文件同步成功完成"
+            echo "同步完成时间: $(date '+%Y-%m-%d %H:%M:%S')"
+          else
+            echo "❌ 文件同步失败"
+            exit 1
+          fi
+        env:
+          CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
+
+      - name: Update repository with sync records
+        run: |
+          git add logs/
+          
+          if git diff-index --quiet HEAD --; then
+            echo "没有新的变更需要提交"
+          else
+            git commit -m "Update sync logs - $(date '+%Y-%m-%d %H:%M:%S')"
+            git push origin main
+            echo "同步记录已更新到仓库"
+          fi
+
