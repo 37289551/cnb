@@ -1,5 +1,5 @@
 
-name: cnb
+name: copy
 
 on:
   schedule:
