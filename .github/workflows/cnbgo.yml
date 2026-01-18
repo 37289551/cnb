@@ -25,3 +25,5 @@ jobs:
             -e PLUGIN_BRANCH="main" \
             -e PLUGIN_FORCE="true" \
             tencentcom/git-sync
+
+            
