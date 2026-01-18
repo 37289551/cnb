@@ -27,7 +27,7 @@ jobs:
       - name: Generate hd.gz from result.m3u
         run: |
           mkdir -p channel
-          cat HD/output/result.m3u > channel/hd.gz
+          gzip -c "HD/output/result.m3u" > "channel/hd.gz"
 
       - name: Check for changes
         run: |
