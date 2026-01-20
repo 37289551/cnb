@@ -2,7 +2,7 @@ name: CNB
 
 on:
   push:
-    branches: [ main ]  # 推送到 main 分支时触发
+    branches: [ main ]  
 
 jobs:
   sync-cnb:
@@ -11,9 +11,9 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 获取全部历史记录
+          fetch-depth: 0 
 
-      - name: 同步到 CNB
+      - name: pushto
         run: |
           docker run --rm \
             -v ${{ github.workspace }}:${{ github.workspace }} \
