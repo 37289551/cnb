@@ -1,0 +1,22 @@
+name: EPG Update
+on:
+  push:
+  schedule:
+    - cron: '05 16,18 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Update EPG Files
+      run: |
+        rm -f e.xml && wget https://epg.112114.xyz/pp.xml -O e.xml
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git add e.xml
+        git commit -m "EPG Update."
+    - name: Push changes
+      run: git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
