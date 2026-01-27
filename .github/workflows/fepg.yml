@@ -27,8 +27,10 @@ jobs:
         git commit -m "EPG Update."
     - name: Push changes
       run: |
+        git pull --rebase origin main || true
         git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
