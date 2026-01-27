@@ -18,11 +18,39 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/HD
           path: HD
+          ref: main  # 确保使用main分支的最新代码
+
+      - name: Check HD repository structure
+        run: |
+          echo "Checking HD repository structure..."
+          ls -la HD/
+          ls -la HD/output/ || echo "HD/output/ directory does not exist"
+          ls -la HD/output/epg/ || echo "HD/output/epg/ directory does not exist"
+          ls -la HD/output/epg/epg.gz || echo "HD/output/epg/epg.gz file does not exist"
 
       - name: Copy epg.gz file
         run: |
+          echo "Copying epg.gz file..."
           mkdir -p epg
+          # 删除旧文件，确保文件被正确刷新
+          rm -f epg/epg.gz || true
+          # 复制新文件
           cp HD/output/epg/epg.gz epg/
+          echo "Copy completed. Checking result..."
+          ls -la epg/
+          # 验证文件是否存在且有内容
+          if [ -f "epg/epg.gz" ]; then
+            echo "epg/epg.gz file exists"
+            file_size=$(stat -c "%s" epg/epg.gz)
+            echo "File size: $file_size bytes"
+            if [ $file_size -gt 0 ]; then
+              echo "File has content"
+            else
+              echo "Warning: File is empty"
+            fi
+          else
+            echo "Error: epg/epg.gz file does not exist after copy"
+          fi
 
       - name: Generate hd.gz from result.m3u
         run: |
@@ -38,8 +66,10 @@ jobs:
           
       - name: Push changes
         run: |
+          # 先拉取远程更改，解决冲突
           git pull --rebase origin main || true
-          git push origin mai
+          # 推送更改
+          git push origin main
 
       - name: Trigger cnbgo workflow
         run: |
