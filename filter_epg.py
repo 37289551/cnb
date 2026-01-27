@@ -67,6 +67,7 @@ def main():
     parser.add_argument('--config', default='channel_groups.yml', help='频道组配置文件路径')
     parser.add_argument('--input', default='e.xml', help='输入EPG文件URL或路径')
     parser.add_argument('--output', default='e.xml', help='输出EPG文件路径')
+    parser.add_argument('--epg-url', default='https://epg.112114.xyz/pp.xml', help='EPG文件下载URL')
     
     args = parser.parse_args()
     
@@ -76,12 +77,36 @@ def main():
     enabled_channels = get_enabled_channels(channel_groups)
     print(f"启用的频道数量: {len(enabled_channels)}")
     
-    print(f"下载/读取EPG文件: {args.input}")
-    if args.input.startswith(('http://', 'https://')):
-        epg_content = download_epg(args.input)
-    else:
-        with open(args.input, 'rb') as f:
-            epg_content = f.read()
+    # 1. 首先尝试使用远程EPG地址
+    print("尝试从远程EPG地址下载: https://epg.112114.xyz/pp.xml")
+    epg_content = None
+    
+    try:
+        epg_content = download_epg('https://epg.112114.xyz/pp.xml')
+        print("从远程EPG地址下载成功")
+    except Exception as e:
+        print(f"从远程EPG地址下载失败: {e}")
+        # 2. 如果下载失败，拷贝epg/epg.gz到根目录改名为e.gz
+        print("尝试拷贝本地EPG文件: epg/epg.gz -> e.gz")
+        try:
+            import shutil
+            import os
+            # 拷贝文件
+            shutil.copy2('epg/epg.gz', 'e.gz')
+            print("拷贝文件成功")
+            # 读取拷贝后的文件
+            import gzip
+            with gzip.open('e.gz', 'rb') as f:
+                epg_content = f.read()
+            print("从拷贝的压缩文件读取成功")
+        except Exception as e:
+            print(f"拷贝文件或读取失败: {e}")
+    
+    # 检查是否成功获取EPG内容
+    if epg_content is None:
+        print("错误: 无法获取EPG内容")
+        import sys
+        sys.exit(1)
     
     print("筛选EPG频道...")
     filtered_epg = filter_epg(epg_content, enabled_channels)
