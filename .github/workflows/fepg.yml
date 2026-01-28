@@ -13,10 +13,8 @@ jobs:
       run: |
         # 安装依赖
         pip install pyyaml requests
-        # 运行EPG筛选脚本（首先尝试远程EPG地址，失败则使用本地文件）
-        python filter_epg.py --output e.xml
-        # 压缩输出文件
-        gzip -c e.xml > e.gz
+        # 运行EPG筛选脚本（直接生成gzip格式的e.gz文件）
+        python filter_epg.py --output e.gz
         # 配置Git并提交
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
