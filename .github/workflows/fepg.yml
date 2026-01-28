@@ -3,9 +3,6 @@ name: FEPG
 on:
   workflow_dispatch:
   push:
-  schedule:
-    - cron: '10,30 16,18 * * *'
-  
 
 jobs:
   build:
@@ -31,6 +28,7 @@ jobs:
         git push origin main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
