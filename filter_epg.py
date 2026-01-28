@@ -66,7 +66,7 @@ def main():
     parser = argparse.ArgumentParser(description='EPG频道筛选工具')
     parser.add_argument('--config', default='channel_groups.yml', help='频道组配置文件路径')
     parser.add_argument('--input', default='e.xml', help='输入EPG文件URL或路径')
-    parser.add_argument('--output', default='e.xml', help='输出EPG文件路径')
+    parser.add_argument('--output', default='e.gz', help='输出EPG文件路径')
     parser.add_argument('--epg-url', default='https://epg.112114.xyz/pp.xml', help='EPG文件下载URL')
     
     args = parser.parse_args()
@@ -80,27 +80,24 @@ def main():
     # 1. 首先尝试使用远程EPG地址
     print("尝试从远程EPG地址下载: https://epg.112114.xyz/pp.xml")
     epg_content = None
-    
+
     try:
         epg_content = download_epg('https://epg.112114.xyz/pp.xml')
         print("从远程EPG地址下载成功")
     except Exception as e:
         print(f"从远程EPG地址下载失败: {e}")
-        # 2. 如果下载失败，拷贝epg/epg.gz到根目录改名为e.gz
-        print("尝试拷贝本地EPG文件: epg/epg.gz -> e.gz")
+        # 2. 如果下载失败，直接拷贝本地EPG文件
+        print("直接拷贝本地EPG文件: epg/epg.gz -> e.gz")
         try:
             import shutil
-            import os
-            # 拷贝文件
-            shutil.copy2('epg/epg.gz', 'e.gz')
+            shutil.copy2('epg/epg.gz', args.output)
             print("拷贝文件成功")
-            # 读取拷贝后的文件
-            import gzip
-            with gzip.open('e.gz', 'rb') as f:
-                epg_content = f.read()
-            print("从拷贝的压缩文件读取成功")
+            print("操作完成!")
+            return  # 直接返回，不进行筛选
         except Exception as e:
-            print(f"拷贝文件或读取失败: {e}")
+            print(f"拷贝文件失败: {e}")
+            import sys
+            sys.exit(1)
     
     # 检查是否成功获取EPG内容
     if epg_content is None:
@@ -110,10 +107,17 @@ def main():
     
     print("筛选EPG频道...")
     filtered_epg = filter_epg(epg_content, enabled_channels)
-    
-    print(f"保存筛选后的EPG到: {args.output}")
-    with open(args.output, 'wb') as f:
-        f.write(filtered_epg)
+
+    # 如果输出文件是.gz格式，直接写入gzip压缩内容
+    if args.output.endswith('.gz'):
+        print(f"保存筛选后的EPG到: {args.output} (gzip格式)")
+        import gzip
+        with gzip.open(args.output, 'wb') as f:
+            f.write(filtered_epg)
+    else:
+        print(f"保存筛选后的EPG到: {args.output}")
+        with open(args.output, 'wb') as f:
+            f.write(filtered_epg)
     
     print("操作完成!")
 
