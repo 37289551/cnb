@@ -46,7 +46,7 @@ jobs:
           # 检查是否已存在result.txt文件，若不存在则从GitHub下载
           if [ ! -f "result.txt" ]; then
             echo "Downloading result.txt from GitHub..."
-            curl -L -o "result.m3u" "https://github.com/37289551/HD/raw/refs/heads/master/output/result.m3u"
+            curl -L -o "HD.m3u" "https://github.com/37289551/HD/raw/refs/heads/master/output/result.m3u"
             if [ $? -eq 0 ]; then
               echo "Download completed."
             else
@@ -55,13 +55,12 @@ jobs:
             fi
           fi
 
-          # 检查result.txt文件是否存在
-          if [ -f "result.txt" ]; then
-            echo "Generating hd.gz from result.txt"
+          if [ -f "HD.m3u" ]; then
+            echo "Generating hd.gz from m3u"
             # 删除旧文件
             rm -f channel/hd.gz || true
             # 生成新文件
-            gzip -c "result.txt" > "channel/hd.gz"
+            gzip -c "HD.m3u" > "channel/hd.gz"
             echo "Generation completed. Checking result..."
             ls -la channel/
             # 验证文件是否存在且有内容
