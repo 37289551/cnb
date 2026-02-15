@@ -78,6 +78,12 @@ jobs:
           fi
           fi
 
+      - name: Update EPG Files
+        run: |
+          # 安装依赖
+          pip install pyyaml requests
+          # 运行EPG筛选脚本（直接生成gzip格式的e.gz文件）
+          python filter_epg.py --output e.gz
 
       - name: Check for changes
         run: |
